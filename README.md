@@ -1,4 +1,4 @@
-# arunm8489-RAG-Evaluation-Using-Promptflow-And-DeepEval
+# RAG-Evaluation-Using-Promptflow-And-DeepEval
 
 
 ### metrics covered
