@@ -1,0 +1,70 @@
+$schema: https://azuremlschemas.azureedge.net/promptflow/latest/Flow.schema.json
+environment:
+  python_requirements_txt: requirements.txt
+inputs:
+  question:
+    type: string
+    default: Where is eiffel tower located?
+  actual_answer:
+    type: string
+    default: Eiffel tower is a famous landmark located in Paris,France.
+  predicted_answer:
+    type: string
+    default: Eiffel tower is located in Paris
+  retrieved_chunks:
+    type: list
+    default:
+    - Paris is the capital of France
+    - Every year people visit France espetially to visit paris
+    - PSG and monocco are famous soccer teams there
+outputs:
+  retrieval_metrics:
+    type: string
+    reference: ${retrieval_metrics_node.output}
+  answer_metrics:
+    type: string
+    reference: ${answer_metrics_node.output}
+  hallucination_metrics:
+    type: string
+    reference: ${hallucination_metrics_node.output}
+nodes:
+- name: retrieval_metrics_node
+  type: python
+  source:
+    type: code
+    path: context_metrics.py
+  inputs:
+    question: ${inputs.question}
+    actual_answer: ${inputs.actual_answer}
+    predicted_answer: ${inputs.predicted_answer}
+    retrieved_chunks: ${inputs.retrieved_chunks}
+- name: answer_metrics_node
+  type: python
+  source:
+    type: code
+    path: answer_metrics.py
+  inputs:
+    question: ${inputs.question}
+    actual_answer: ${inputs.actual_answer}
+    predicted_answer: ${inputs.predicted_answer}
+    retrieved_chunks: ${inputs.retrieved_chunks}
+- name: hallucination_metrics_node
+  type: python
+  source:
+    type: code
+    path: hallucination.py
+  inputs:
+    question: ${inputs.question}
+    actual_answer: ${inputs.actual_answer}
+    predicted_answer: ${inputs.predicted_answer}
+    retrieved_chunks: ${inputs.retrieved_chunks}
+- name: aggregate_node
+  type: python
+  source:
+    type: code
+    path: aggregate.py
+  inputs:
+    retrieval_metrics: ${retrieval_metrics_node.output}
+    answer_metrics: ${answer_metrics_node.output}
+    hallucination_metrics: ${hallucination_metrics_node.output}
+  aggregation: true
